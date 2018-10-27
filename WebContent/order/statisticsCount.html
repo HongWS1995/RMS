@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="css/icon.css">
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<style type="text/css">
+ .panel-body{border:0px;background-color: inherit;}
+ </style>
+<title>订单量统计</title>
+</head>
+<body>
+<!-- 	<div class="row" style="background-color:lightyellow"> -->
+<!-- 	      <div class="col-md-4"><h4><strong>订单量统计</strong></h4></div> -->
+<!-- 	      <div class="col-md-8 text-right"> -->
+<!-- 	      </div> -->
+<!-- 	</div> -->
+	<div class="panel-body" >
+        <form class="form-inline" role="form" id="orderStatisticform" onkeydown="if(event.keyCode==13)return false;">
+		  <div class="form-group">
+		   <label for="status">订单状态</label>
+		   <select class="form-control statusSelect" name="status">
+		   		<option value="">请选择</option>
+				<option value="已提交">已提交</option>
+				<option value="已收费">已收费</option>
+				<option value="已完成">已完成</option>
+				<option value="已取消">已取消</option>
+				<option value="已退款">已退款</option>
+		   </select>
+		   <label for="status">查询周期</label>
+		   <select class="form-control periodSelect" name="period">
+		   		<option value="">请选择</option>
+				<option value="日">日</option>
+				<option value="月">月</option>
+				<option value="年">年</option>
+		   </select>
+		   <label for="startTime">起始时间</label>
+		   <input type="date" class="form-control" name="startTime">
+		   <label for="endTime">截止时间</label>
+		    <input type="date" class="form-control" name="endTime">
+		  </div>
+		  <a href="javascript:void(0)" id="orderStatistic" class="btn btn-default">统计订单量</a>
+		  <a href="javascript:void(0)" id="orderAmountStatistic" class="btn btn-default">统计订单金额</a>
+		</form>
+    </div>
+	<br><br>
+	<div class="table-responsive" style="background-color: white" >
+	</div>
+	 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="mainChart" style="width: 100%;height:400px;"></div>
+    <script type="text/javascript">
+    
+    	//var period = $("select[name='periodSelect']").val();
+    	var period='日';
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('mainChart'));
+        var app = {};
+        app.title = '餐厅订单 - 条形图';
+        option = {
+                title: {
+                    text: '已提交订单',
+                    subtext: '数据来自餐厅系统'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: [{name:period,textStyle:{
+                    	fontWeight:'bolder',
+                    	fontSize:18,
+                    	lineHeight:20
+                    }
+                   }]
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                dataZoom: [
+                    {
+                        type: 'slider',
+                        show: true,
+                        start: 10,
+                        end: 100,
+                        handleSize: 8
+                    },
+                    {
+                        type: 'inside',
+                        start: 80,
+                        end: 100
+                    },
+                    {
+                        type: 'slider',
+                        show: false,
+                        yAxisIndex: 0,
+                        filterMode: 'empty',
+                        width: 12,
+                        height: '70%',
+                        handleSize: 8,
+                        showDataShadow: false,
+                        left: '93%'
+                    }
+                ],
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, 0.01]
+                },
+                xAxis: {
+                    type: 'category',
+                    data: [ '广州文昌鸡','明炉烤乳猪','新龙皇夜宴','清蒸东星斑']
+                },
+                series: [
+                    {
+                        name: period,
+                        type: 'bar',
+                        label: {
+                            normal: {
+                            	lineHeight:56,
+                                show: true,
+                                position: 'top',
+                                distance:20
+                            }
+                        },
+                        data: [6,8,10,18]
+                    },
+                ]
+            };
+        $(document).ready(function(){
+        	option['title']['text']="已完成订单";
+        	$("select[name='status']").find("option[value='已完成']").attr("selected","selected");
+        	$.get("order/getOrderStatistic",{status:"已完成",period:"日"},function(data){
+        		if(data.result=="success"){
+//         			alert(JSON.stringify(data));
+						
+//         			//x轴返回时间
+                	option['xAxis']['data']=data.xAxis;
+                	//y轴显示数量
+                	option['series'][0]['data']=data.series_quantity;
+                	 // 使用刚指定的配置项和数据显示图表。
+                    if (option && typeof option === "object") {
+                			 myChart.setOption(option, true);
+             		}
+        		}
+        	});
+        	
+        });
+        
+
+
+      
+    </script>
+    <script type="text/javascript">
+    	//订单量统计
+    	$("a#orderStatistic").click(function(){
+    		var status = $("select[name='status']").val();
+    		var period = $("select[name='period']").val();
+    		if(period=="")
+    			period+="年订单量";
+    		else
+    			period+="订单量";
+    		option['title']['text']=status+"订单";
+    		option['legend']['data'][0]['name'] = period;
+    		option['series'][0]['name'] = period;
+    		$.get("order/getOrderStatistic",$("form#orderStatisticform").serialize(),function(data){
+    			//x轴返回时间
+            	option['xAxis']['data']=data.xAxis;
+            	//y轴显示数量
+            	option['series'][0]['data']=data.series_quantity;
+            	 // 使用刚指定的配置项和数据显示图表。
+                if (option && typeof option === "object") {
+            			 myChart.setOption(option, true);
+         		}
+    		});
+    	});
+    	//订单金额统计
+    	$("a#orderAmountStatistic").click(function(){
+    		var status = $("select[name='status']").val();
+    		var period = $("select[name='period']").val();
+    		if(period=="")
+    			period+="年订单总额";
+    		else
+    			period+="订单总额";
+    		option['title']['text']=status+"订单";
+    		option['legend']['data'][0]['name'] = period;
+    		option['series'][0]['name'] = period;
+    		$.get("order/getOrderStatistic",$("form#orderStatisticform").serialize(),function(data){
+    			//x轴返回时间
+            	option['xAxis']['data']=data.xAxis;
+            	//y轴显示数量
+            	option['series'][0]['data']=data.series_amount;
+            	 // 使用刚指定的配置项和数据显示图表。
+                if (option && typeof option === "object") {
+            			 myChart.setOption(option, true);
+         		}
+    		});
+    	});
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hong.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.hong.bean.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="tel" jdbcType="VARCHAR" property="tel" />
+    <result column="isLogin" jdbcType="VARCHAR" property="islogin" />
+    <result column="login_times" jdbcType="INTEGER" property="loginTimes" />
+    <result column="lastest_login_time" jdbcType="VARCHAR" property="lastestLoginTime" />
+    <result column="isstaff" jdbcType="CHAR" property="isstaff" />
+    <result column="Ptype_id" jdbcType="INTEGER" property="ptypeId" />
+    <result column="canLogin" jdbcType="INTEGER" property="canlogin" />
+  </resultMap>
+  
+  <resultMap id="Ptyperesult" type="com.hong.bean.Ptype">
+    <id column="pid" jdbcType="INTEGER" property="id" />
+    <result column="p_name" jdbcType="VARCHAR" property="name" />
+  </resultMap>
+ <resultMap id="UserPtypeResultMap" type="com.hong.bean.User">
+    <id column="u_id" jdbcType="INTEGER" property="id" />
+    <result column="u_username" jdbcType="VARCHAR" property="username" />
+     <result column="u_tel" jdbcType="VARCHAR" property="tel" />
+    <result column="u_address" jdbcType="VARCHAR" property="address" />
+    <result column="u_isLogin" jdbcType="VARCHAR" property="islogin" />
+    <result column="u_login_times" jdbcType="INTEGER" property="loginTimes" />
+    <result column="u_lastest_login_time" jdbcType="VARCHAR" property="lastestLoginTime" />
+    <result column="u_canLogin" jdbcType="INTEGER" property="canlogin" />
+    <association property="ptype" column="ptypeId" javaType="com.hong.bean.Ptype" resultMap="Ptyperesult" ></association>
+ </resultMap>
+ 
+  <sql id="Base_Column_List">
+   
+    id, username,tel,address, isLogin, login_times, lastest_login_time, isstaff, Ptype_id, 
+    canLogin
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+   
+    select 
+    <include refid="Base_Column_List" />
+    from user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getUserByNamePassword" resultMap="BaseResultMap">
+  	select 
+    <include refid="Base_Column_List" />
+    from user
+    where username = #{username} and password=#{password}	
+  </select>
+  <select id="getUserList" resultMap="UserPtypeResultMap">
+	select  
+	u.id as u_id,
+	u.username as u_username,
+	u.ptype_Id as ptypeId,
+	p.id as pid,
+	p.name as p_name,
+	u.address as u_address,
+	u.tel as u_tel,
+	u.isLogin as u_isLogin,
+	u.login_times as u_login_times,
+	u.lastest_login_time as u_lastest_login_time,
+	u.canLogin as u_canLogin
+	from  User u left outer join Ptype p
+	on u.ptype_id = p.id
+	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="user.username!=null">AND u.username=#{user.username}</if>
+			<if test="user.isLogin!=null">AND u.isLogin=#{user.islogin}</if>
+			<if test="user.isstaff!=null">AND u.isstaff=#{user.isstaff}</if>
+			<if test="user.canLogin!=null">AND u.canLogin=#{user.canlogin}</if>
+			<if test="user.ptypeId!=null">AND u.ptype_Id=#{user.ptypeId}</if>
+	</trim>
+	order by u.id
+	limit #{currentPage},#{pageSize}
+	
+</select>
+<select id="selectCount" resultType="Integer">
+		select count(*) from  User 
+	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="user.username!=null">username=#{user.username}</if>
+			<if test="user.isLogin!=null">AND isLogin=#{user.islogin}</if>
+			<if test="user.isstaff!=null">AND isstaff=#{user.isstaff}</if>
+			<if test="user.canLogin!=null">AND canLogin=#{user.canlogin}</if>
+			<if test="user.ptypeId!=null">AND ptype_Id=#{user.ptypeId}</if>
+	</trim>
+</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+   
+    delete from user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hong.bean.User" useGeneratedKeys="true" keyProperty="id">  
+    insert into user (id, username, password,
+      isLogin, login_times, lastest_login_time, 
+      isstaff, Ptype_id, canLogin,address,tel
+      )
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{islogin,jdbcType=VARCHAR}, #{loginTimes,jdbcType=INTEGER}, #{lastestLoginTime,jdbcType=VARCHAR}, 
+      #{isstaff,jdbcType=CHAR}, #{ptypeId,jdbcType=INTEGER}, #{canlogin,jdbcType=INTEGER},
+      #{address,jdbcType=VARCHAR}, #{tel,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hong.bean.User">
+   
+    insert into user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="password != null">
+        password,
+      </if>
+      <if test="islogin != null">
+        isLogin,
+      </if>
+      <if test="loginTimes != null">
+        login_times,
+      </if>
+      <if test="lastestLoginTime != null">
+        lastest_login_time,
+      </if>
+      <if test="isstaff != null">
+        isstaff,
+      </if>
+      <if test="ptypeId != null">
+        Ptype_id,
+      </if>
+      <if test="canlogin != null">
+        canLogin,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="tel != null">
+        tel,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="islogin != null">
+        #{islogin,jdbcType=VARCHAR},
+      </if>
+      <if test="loginTimes != null">
+        #{loginTimes,jdbcType=INTEGER},
+      </if>
+      <if test="lastestLoginTime != null">
+        #{lastestLoginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isstaff != null">
+        #{isstaff,jdbcType=CHAR},
+      </if>
+      <if test="ptypeId != null">
+        #{ptypeId,jdbcType=INTEGER},
+      </if>
+      <if test="canlogin != null">
+        #{canlogin,jdbcType=INTEGER},
+      </if>
+       <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+       <if test="tel != null">
+        #{tel,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hong.bean.User">
+   
+    update user
+    <set>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null and password != ''">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="islogin != null">
+        isLogin = #{islogin,jdbcType=VARCHAR},
+      </if>
+      <if test="loginTimes != null">
+        login_times = #{loginTimes,jdbcType=INTEGER},
+      </if>
+      <if test="lastestLoginTime != null">
+        lastest_login_time = #{lastestLoginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="isstaff != null">
+        isstaff = #{isstaff,jdbcType=CHAR},
+      </if>
+      <if test="ptypeId != null">
+        Ptype_id = #{ptypeId,jdbcType=INTEGER},
+      </if>
+      <if test="canlogin != null">
+        canLogin = #{canlogin,jdbcType=INTEGER},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="tel != null">
+        tel = #{tel,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hong.bean.User">
+   
+    update user
+    set username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      isLogin = #{islogin,jdbcType=VARCHAR},
+      login_times = #{loginTimes,jdbcType=INTEGER},
+      lastest_login_time = #{lastestLoginTime,jdbcType=VARCHAR},
+      isstaff = #{isstaff,jdbcType=CHAR},
+      Ptype_id = #{ptypeId,jdbcType=INTEGER},
+      canLogin = #{canlogin,jdbcType=INTEGER},
+      address = #{address,jdbcType=VARCHAR},
+      tel = #{tel,jdbcType=VARCHAR},
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="css/easyui.css">
+<link rel="stylesheet" type="text/css" href="css/icon.css">
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+ <style type="text/css">
+ .panel-body{border:0px;background-color: inherit;}
+ </style>
+<title>员工管理</title>
+</head>
+<body>
+	<div class="row" style="background-color:lightyellow">
+	      <div class="col-md-4"><h4><strong>员工管理</strong></h4></div>
+	      <div class="col-md-8 text-right">
+	        <a href="#" id="userAddLink" class="btn btn-default" data-toggle="modal" data-target="#addUser">增加员工</a>
+	        <a href="#" id="userModifyLink" class="btn btn-default" data-toggle="modal" data-target="#updateUser">修改员工</a>
+	        <a href="#" id="userDeleteLink" class="btn btn-default" data-toggle="modal" data-target="#deleteUser">删除员工</a>
+	        <a href="javascript:void(0)" id="uploadPayImageLink" class="btn btn-default">上传收款码</a>
+	      </div>
+	</div>
+	<div class="panel-body" >
+        <form class="form-inline" role="form" id="userform" onkeydown="if(event.keyCode==13)return false;">
+		  <div class="form-group">
+		    <label  for="name">员工类型</label>
+		    <select id="userTypeSelect" class="form-control userSelect">    	
+ 		       <option selected value="">请选择</option> 
+<!-- 		       <option value="2">VIP员工</option> -->
+<!-- 		       <option value="3">前台收银员</option> -->
+<!-- 		       <option value="4">服务员</option> -->
+<!-- 		       <option value="5">厨师</option> -->
+<!-- 		       <option value="6">管理人员</option> -->
+<!-- 		       <option value="7">系统管理员</option> -->
+		    </select>
+		  </div>
+		  <div class="form-group">
+		    <label  for="name">员工名</label>
+		    <input type="text" class="form-control" name="username" />
+		  </div>
+		   <a href="#" id="userViewLink" class="btn btn-default">查找员工</a>
+		  
+		</form>
+    </div>
+	<br><br>
+	<input type="hidden" id="currentPage" value="1"/>
+	<input type="hidden" id="totalRecord"/>
+	<input type="hidden" id="totalPage" value="0"/>
+	<input type="hidden" id="isBindLink" value="0"/>
+	<input type="hidden" id="QueryForm" value="0"/>
+	<input type="hidden" id="currentClickRowId" value="">
+	<div class="table-responsive" style="background-color: white" >
+            <table class="table table-bordered table-hover table-striped">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>ID</th>
+                  <th>员工名</th>
+                  <th>电话</th>
+                  <th>地址</th>
+                  <th>登陆状态</th>
+                  <th>登陆次数</th>
+                  <th>最近登录时间</th>              
+                  <th>能否登录</th>
+                  <th>员工类型</th>  
+                </tr>
+              </thead>
+              <tbody id="userTable">
+                
+              </tbody>
+              
+            </table>
+</div>
+ <span class="btn_span text-left" id="currentPage">当前页：</span>
+ <span class="btn_span text-right" id="totalPage">总页数：</span>
+ <span class="btn_span text-right" id="totalRecord">总记录数：</span>
+<div class="btn-toolbar" role="toolbar">
+	
+	<div class="btn-group" style="margin-left: 30%" id="pageButton">
+		
+		 <a href="#"  class="btn btn-default" id="firstPage">首页</a>
+		 <a href="#"  class="btn btn-default" id="prevPage">&lt;&lt;&nbsp;上一页</a>
+		 <a href="#"  class="btn btn-default" id="nextPage">下一页&nbsp;&gt;&gt;</a>
+		 <a href="#"  class="btn btn-default" id="lastPage">末页</a>
+		
+	</div>	
+</div>
+	      
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">增加员工</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<label for="name">员工名</label>
+							<input type="text"class="form-control" name="username" placeholder="请输入名称" required="required">
+<!-- 							<label for="password">密码</label> -->
+<!-- 							<input type="password"class="form-control" name="password" placeholder="请输入密码" required="required"> -->
+							<label for="canlogin">授权登陆</label>
+							<select class="form-control" name="canlogin" required="required">
+								<option value="0">禁止登陆</option>
+								<option value="1">授权登陆</option>
+							</select>
+							<label for="ptypeId">员工类型</label>
+							<select class="form-control userSelect" name="ptypeId" required="required">
+								
+							</select>
+							<label for="tel">电话</label>
+							<input type="text"class="form-control" name="tel" placeholder="请输入电话">
+							<label for="address">地址</label>
+							<input type="text"class="form-control" name="address" placeholder="请输入地址">
+							
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="addUserBtn">增加</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+	<div class="modal fade" id="updateUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">修改员工</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<input type="hidden" name="id"/>
+							<label for="name">员工名</label>
+							<input type="text"class="form-control" name="username" placeholder="请输入名称" required="required">
+<!-- 							<label for="password">密码</label> -->
+<!-- 							<input type="password"class="form-control" name="password" placeholder="请输入密码" required="required"> -->
+							<label for="canlogin">授权登陆</label>
+							<select class="form-control" name="canlogin" required="required">
+								<option value="0">禁止登陆</option>
+								<option value="1">授权登陆</option>
+							</select>
+							<label for="ptypeId">员工类型</label>
+							<select class="form-control userSelect" name="ptypeId" required="required">
+							</select>
+							<label for="tel">电话</label>
+							<input type="text"class="form-control" name="tel" placeholder="请输入电话">
+							<label for="address">地址</label>
+							<input type="text"class="form-control" name="address" placeholder="请输入地址">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="updateUserBtn">修改</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+
+<div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">删除员工</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<input type="hidden" name="id"/>
+							<label for="name">员工名</label>
+							<input type="text"class="form-control" name="username" readonly="readonly">
+							<label for="canlogin">授权登陆</label>
+							<select class="form-control" name="canlogin" disabled="disabled">
+								<option value="1">授权登陆</option>
+								<option value="0">禁止登陆</option>
+							</select>
+							<label for="ptypeId">员工类型</label>
+							<select class="form-control userSelect" name="ptypeId" disabled="disabled">
+							</select>
+							<label for="tel">电话</label>
+							<input type="text"class="form-control" name="tel" placeholder="请输入电话">
+							<label for="address">地址</label>
+							<input type="text"class="form-control" name="address" placeholder="请输入地址">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="deleteUserBtn">删除</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+	<div class="modal fade" id="uploadPayImageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">上传收款码</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form" enctype="multipart/form-data">
+						<div class="form-group">
+							<label for="file">点击上传</label>
+							<input type="file" class="form-control" name="file" required="required">
+							
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer" >
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="uploadPayImageBtn">上传</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+	<script type="text/javascript" src="user/main.js"></script>
+</body>
+</html>

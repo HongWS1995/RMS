@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hong.dao.TableRMapper">
+  <resultMap id="BaseResultMap" type="com.hong.bean.TableR">
+   
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="table_name" jdbcType="VARCHAR" property="tableName" />
+    <result column="table_capacity" jdbcType="INTEGER" property="tableCapacity" />
+    <result column="status" jdbcType="CHAR" property="status" />
+  </resultMap>
+  <sql id="Base_Column_List">
+   
+    id, table_name, table_capacity, status
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+   
+    select 
+    <include refid="Base_Column_List" />
+    from table_r
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="getTableRList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from table_r
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			isRemove='N'
+			<if test="tabler.tableName!=null">AND table_name like "%"#{tabler.tableName}"%"</if>
+			<if test="tabler.status!=null">AND status=#{tabler.status}</if>
+		</trim>
+		limit #{currentPage},#{pageSize}
+	</select>
+	<select id="getTableRCount" resultType="Integer">
+		select count(1) from table_r
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="tabler.tableName!=null">table_name like "%"#{tabler.tableName}"%"</if>
+			<if test="tabler.status!=null">AND status=#{tabler.status}</if>
+		</trim>
+	</select>
+  <select id="getAllTableR" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from table_r
+	</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+   update table_r set isRemove='Y'
+<!--     delete from table_r -->
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hong.bean.TableR" useGeneratedKeys="true" keyProperty="id">
+   
+    insert into table_r (id, table_name, table_capacity, 
+      status)
+    values (#{id,jdbcType=INTEGER}, #{tableName,jdbcType=VARCHAR}, #{tableCapacity,jdbcType=INTEGER}, 
+      #{status,jdbcType=CHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hong.bean.TableR" useGeneratedKeys="true" keyProperty="id">
+   
+    insert into table_r
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="tableName != null">
+        table_name,
+      </if>
+      <if test="tableCapacity != null">
+        table_capacity,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tableName != null">
+        #{tableName,jdbcType=VARCHAR},
+      </if>
+      <if test="tableCapacity != null">
+        #{tableCapacity,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=CHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hong.bean.TableR">
+   
+    update table_r
+    <set>
+      <if test="tableName != null">
+        table_name = #{tableName,jdbcType=VARCHAR},
+      </if>
+      <if test="tableCapacity != null">
+        table_capacity = #{tableCapacity,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hong.bean.TableR">
+   
+    update table_r
+    set table_name = #{tableName,jdbcType=VARCHAR},
+      table_capacity = #{tableCapacity,jdbcType=INTEGER},
+      status = #{status,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

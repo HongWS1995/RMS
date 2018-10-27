@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hong.dao.CategoryMapper">
+	<resultMap id="BaseResultMap" type="com.hong.bean.Category">
+
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+	</resultMap>
+	<resultMap id="ProductResultMap" type="com.hong.bean.Product">
+	    <id column="p_id" jdbcType="INTEGER" property="id" />
+	    <result column="p_name" jdbcType="VARCHAR" property="name" />
+	    <result column="p_price" jdbcType="REAL" property="price" />
+	    <result column="p_imagePath" jdbcType="VARCHAR" property="imagepath" />
+  	</resultMap>
+	<resultMap type="com.hong.bean.Category" id="CategoryProductMap">
+		<id column="c_id" jdbcType="INTEGER" property="id" />
+		<result column="c_name" jdbcType="VARCHAR" property="name" />
+		<collection property="products" ofType="com.hong.bean.Product" resultMap="ProductResultMap"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+
+		id, name
+	</sql>
+	<select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+
+		select
+		<include refid="Base_Column_List" />
+		from category
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="getCategoryList" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from category
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="category.name!=null">name like "%"#{category.name}"%"</if>
+		</trim>
+		limit #{currentPage},#{pageSize}
+	</select>
+	<select id="getAllCategoryProduct" resultMap="CategoryProductMap">
+		select 	c.id as c_id,
+				c.name c_name,
+				p.id as p_id,
+				p.name as p_name,
+				p.price as p_price,
+				p.imagepath as p_imagepath
+		from category c left outer join product p
+		on c.id = p.cid where p.isRemove='N'
+	</select>
+	<select id="getCategoryCount" resultType="Integer">
+		select count(1) from category
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="category.name!=null">name like "%"#{category.name}"%"</if>
+		</trim>
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+
+		delete from category
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.hong.bean.Category"
+		useGeneratedKeys="true" keyProperty="id">
+
+		insert into category (id, name)
+		values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.hong.bean.Category"
+		useGeneratedKeys="true" keyProperty="id">
+
+		insert into category
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.hong.bean.Category">
+
+		update category
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.hong.bean.Category">
+
+		update category
+		set name = #{name,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

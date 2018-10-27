@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bootstrap 附加导航（Affix）插件</title>
+<!-- <link rel="stylesheet" href="../css/bootstrap.min.css"> -->
+<!-- <script src="../js/jquery.min.js"></script> -->
+<!-- <script src="../js/bootstrap.min.js"></script> -->
+<style>
+/* Custom Styles */
+	body{
+		padding:0px;
+		margin-left:0;
+		margin-top:51px;
+		background-color: lightyellow;
+		position: relative;
+	}
+    ul.nav-tabs{
+/*     	width:80px; */
+    	margin-top:0;
+     	position: fixed;
+     	overflow-y:scroll;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.067);
+    }
+     ul.nav-tabs::-webkit-scrollbar {/*滚动条整体样式*/
+            width: 0px;     /*高宽分别对应横竖滚动条的尺寸*/
+            height: 0px;    
+        }
+    ul.nav-tabs li{
+        margin: 0;
+        border-top: 1px solid #ddd;
+    }
+    ul.nav-tabs li:first-child{
+        border-top: none;
+    }
+    ul.nav-tabs li a{
+        margin: 0;
+        padding: 8px 16px;
+        border-radius: 0;
+    }
+    ul.nav-tabs li.active a, ul.nav-tabs li.active a:hover{
+        color: #fff;
+        background: #0088cc;
+        border: 1px solid #0088cc;
+    }
+    ul.nav-tabs li:first-child a{
+        border-radius: 4px 4px 0 0;
+    }
+    ul.nav-tabs li:last-child a{
+        border-radius: 0 0 4px 4px;
+    }
+/*     ul.nav-tabs.affix{  */
+/*        top: 100px; /* Set the top position of pinned element */  
+/*     }  */
+    .count{
+    	width:100%;
+    	size:40px;
+    	height:34px;
+    	text-align: center;
+    }
+    .name{
+    	size:18px;
+    	font-weight:bold;
+    	height:20px;
+    }
+    .price{
+    	size:19px;
+    	height:20px;
+    	font-weight:bold;
+    	color:red;
+    }
+    .center{
+    	text-align: center;
+    	color:red;
+    	height:25px;
+    }
+    .productText{
+    	text-align: center;
+    }
+/*     div#product{ */
+/*     	height:600px; */
+/*     	overflow-y: scroll; */
+/*     } */
+</style>
+</head>
+<body>
+<audio id="UserAudio" src="http://tsn.baidu.com/text2audio?
+	lan=zh&ctp=1&cuid=abcdxxx&
+	tok=24.e89cd9c9896d915b83a3db71edd1bc8f.2592000.1528372415.282335-10846811
+	&tex=欢迎点餐&vol=9&per=0&spd=5&pit=5"></audio>
+<div class="row" >
+        <div class="col-xs-4 col-sm-2 col-lg-2"  id="myScrollspy">
+            <ul class="nav nav-tabs nav-stacked"  id="CategoryList" data-spy="affix" data-offset-top="125"></ul>
+        </div>
+        
+        <div class="col-xs-8 col-sm-10 col-lg-10" id="product">
+        	<div class="row">
+        		<!-- 餐桌start -->
+        		<div class="panel-body" style="background-color: inherit;border:none;">
+        			<form class="form-inline" role="form" id="productform" onkeydown="if(event.keyCode==13)return false;">
+		  				<div class="form-group">
+		    				<label  for="name" style="color:red;font-size:20px;">温馨提示：点餐前请选择您的位置，谢谢。☟</label>
+		    				<label  for="name" style="color:red;font-size:20px;">您的位置：</label>
+		    				<select id="tableSelect" class="form-control positionSelect" style="color:red;font-size:16px;">    	
+ 		      				 	<option selected value="">请选择</option> 
+		    				</select>
+		  				</div>
+					</form>
+    			</div>
+        		<!--  -->		
+        	</div>
+ 		 </div>
+ 		 
+ 		 <div id="clickPay" class="row" style="position:fixed;bottom:0;width: 100%;">
+    		<a href="#" class="btn btn-default" id="clickPayBtn" style="display: block;background-color: #87CEFA;height:30px">点击付款</a>
+		</div>
+		<!-- 模态框1 -->
+		<div class="modal fade" id="createOrder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">订单详情</h4>
+				</div>
+				<div class="modal-body" id="showPrice">
+					<div class="table-responsive" style="background-color: white">
+						<table class="table  table-hover table-striped">
+						<thead>
+							<tr>
+								<th>序号</th>
+								<th>商品</th>
+								<th>价格</th>
+								<th>数量</th>
+							</tr>
+						</thead>
+						<tbody id="detailTable">
+						</tbody>
+					</table>
+				</div>
+				<form role="form">
+						<div class="form-group">
+							<label for="remark">备注:</label>
+							 <textarea class="form-control" id="remark"  name="remark" placeholder="您可以输入备注" required="required"></textarea>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="addOrder" data-toggle="modal" data-target="#submitOrder">开始付款</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+	<!-- 模态框2 显示付款码 -->
+		<div class="modal fade" id="submitOrder" tabindex="-2" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel" style="text-align: center;font:bold;">扫码付款</h4>
+				</div>
+				<div class="modal-body" id="final">
+					<div class="table-responsive" style="background-color: white">
+						<table class="table  table-hover table-striped">
+						<thead>
+							<tr>
+								<th class="center">长按二维码付款</th>
+							</tr>
+							<tr>
+								<th class="center">付款成功请保留付款记录</th>
+							</tr>
+							<tr>
+								<th id="finalPrice" class="center"></th>
+							</tr>
+						</thead>
+						<tbody id="detailTable">
+<!-- 							<tr> -->
+<!-- 								<td><img alt="支付宝" src="image/alipay.jpg" width="98%"></td> -->
+<!-- 							</tr> -->
+							<tr>
+								<td><img alt="微信" src="image/pay/wechat.jpg" width="98%"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary" id="submitOrderSuccess">确认付款成功</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+</div>
+
+<script type="text/javascript">  
+var websocket;  
+if ('WebSocket' in window) {  
+    //Websocket的连接  
+    if(websocket==undefined)
+    	websocket = new WebSocket("ws://"+document.location.host+"/RMS/websocket/socketServer");//WebSocket对应的地址  
+}  
+else if ('MozWebSocket' in window) {  
+    //Websocket的连接  
+    websocket = new MozWebSocket("ws://"+document.location.host+"/RMS/websocket/socketServer.do");//SockJS对应的地址  
+}  
+else {  
+    //SockJS的连接  
+    websocket = new SockJS("http://"+document.location.host+"/RMS/sockjs/socketServer.do");    //SockJS对应的地址  
+}  
+websocket.onopen = onOpen;  
+websocket.onmessage = onMessage;  
+websocket.onerror = onError;  
+websocket.onclose = onClose;  
+
+function onOpen(openEvt) {
+	console.log("连接成功");  
+}  
+
+function onMessage(evt) {
+	$("#UserAudio").attr("src","http://tsn.baidu.com/text2audio?lan=zh&ctp=1&cuid=abcdxxx&tok=24.e89cd9c9896d915b83a3db71edd1bc8f.2592000.1528372415.282335-10846811&tex="+evt.data+"&vol=8&per=4&spd=5&pit=4");
+	$("#UserAudio")[0].play();
+	$("#UserAudio").unbind("ended");
+	$("#UserAudio").on("ended",function(){
+			alert(evt.data);
+	});  
+}  
+function onError() {  
+}  
+function onClose() {  
+}  
+
+function doSend(orderId){  
+    if (websocket.readyState == websocket.OPEN) { 
+    	var tableName = $("select#tableSelect").find("option[value="+$("select#tableSelect").val()+"]").text();
+        //var msg = document.getElementById("inputMsg").value;
+        var order_Msg = new Object();
+        order_Msg.tableName = tableName;
+        order_Msg.orderId = orderId;
+        websocket.send(JSON.stringify(order_Msg));//调用后台handleTextMessage方法    
+    } else {  
+        alert("连接失败!");  
+    }  
+}  
+
+window.close = function () {  
+    websocket.onclose();  
+}    
+</script>
+<script>
+  			total = document.documentElement.clientHeight;
+  			colHeight = total-120-document.getElementById("myScrollspy").offsetTop;
+  			document.getElementById("CategoryList").style.height=colHeight+"px";
+  			$(document).ready(function(){
+  				
+  				//显示座位
+  				$.get("tabler/getAllTableR",function(data){
+  					if(data.result=="success"){
+  						var beanList = data['beanList'];
+  						var ops="";
+  						for(var i = 0;i<beanList.length;i++){
+  							var bean = beanList[i];
+  							if(bean['status']=='空闲'){
+  								ops +="<option value="+bean['id']+">"+bean['tableName']+"</option>";
+  							}
+  								
+  						}
+  						
+  						$("select#tableSelect").append(ops);
+  					}
+  					
+  				});
+  				//显示商品类
+  				$.get("category/CategoryList",{currentPage:1,pageSize:100},function(data){
+  					if(data.result=="success"){
+  						var beanList = data.pageBean['beanList'];
+  						var links="";
+  						for(var i=0;i<beanList.length;i++){
+  							var bean = beanList[i];
+  							if(i==0)
+  								links +="<li class='active productText'><a href='#"+bean['id']+"'>"+bean['name']+"</a></li>";
+  							else
+  								links +="<li class='productText'><a href='#"+bean['id']+"'>"+bean['name']+"</a></li>";
+  						}
+  						
+  						$("ul#CategoryList").empty();
+  						$("ul#CategoryList").append(links);
+  					}
+  				});
+  				
+  				//显示商品
+  				$.get("category/CategoryProductList",function(data){
+  					if(data.result=="success"){
+  						//console.log(JSON.stringify(data.beanList));
+  						var beanList = data.beanList;
+  						for(var i = 0;i<beanList.length;i++){
+  							 var h3 = "<div class='row' id='"+beanList[i]['id']+"'><h3>"+beanList[i]['name']+"</h3>";
+  							 var products = beanList[i]['products'];
+  							 var divs="";
+  							 for(var j = 0;j<products.length;j++){
+  								 var imagePath = products[j]['imagepath'];
+  								 if(imagePath==null||imagePath=="")
+  									 imagePath="image/default.jpg";
+  								 divs=divs+'<div style="width:98%;float:left;" class="item_product">'+
+  								 			
+  								 			'<input type="hidden" name="productid" value="'+products[j]['id']+'">'+
+  								 			'<div class="row">'+
+  												'<div class="col-xs-12 col-sm-12 col-lg-12">'+
+  								 					'<img  src="'+imagePath+'" name="imagepath" width="100%" height="120px">'+
+  											 	'</div>'+
+  								 			'</div>'+
+  								 			'<div class="row">'+
+  												'<div class="col-xs-6 col-sm-6 col-lg-6">'+
+  								 					'<span  class="name">'+products[j]['name']+'</span>'+
+  								 				'</div>'+
+  								 				'<div class="col-xs-6 col-sm-6 col-lg-6">'+
+  								 					'<span  class="price">'+products[j]['price']+'元</span>'+
+  								 				'</div>'+
+  											'</div>'+
+  								 			'<div class="row">'+
+  								 				'<div class="col-xs-4 col-sm-4 col-lg-5"> 			'+
+  								 					'<button type="button" class="btn btn-default minusCount">'+
+  													 '<span class="glyphicon glyphicon-minus"></span>'+
+  								 					'</button>'+
+  								 				'</div>'+
+  								 				'<div class="col-xs-4 col-sm-4 col-lg-2">'+
+  								 				'<input type="text" class="count"  name="count" value="0" readonly="readonly"/>'+
+  								 				'</div>'+
+  								 				'<div class="col-xs-4 col-sm-4 col-lg-5">'+
+  								 					'<button type="button" class="btn btn-default text-right plusCount" style="float: right">'+
+  								 					'<span class="glyphicon glyphicon-plus"></span>		'+
+  								 					'</button>'+
+  								 				'</div>'+
+  								 			'</div>'+
+  								 '</div>';
+  							 }
+  							 $("div#product").append(h3+divs+"</div>");
+  							
+  						}
+  						
+  						//减少商品数量
+  						$('.minusCount').click(function(){
+  							var curVal = parseInt($(this).parent().parent().find(".count").val());
+  							if(curVal>0)
+  								curVal = curVal-1;
+  							$(this).parent().parent().find(".count").val(curVal);
+  						});
+  						//增加商品数量
+  						$('.plusCount').click(function(){
+  							var curVal = parseInt($(this).parent().parent().find(".count").val());
+  							curVal = curVal+1;
+  							$(this).parent().parent().find(".count").val(curVal);
+  						});
+  						//测试获得所有值大于0的商品ID
+  						$("a#clickPayBtn").click(function(){
+//   		  					var val2 = $(this).parent('div').parent('div').parent('div').children("input[name='productid']").val();	
+//   		  	  				alert(val2);
+  							var table_id = $("select#tableSelect").val();
+  							var isEmpty = 1;
+  		  					if(table_id==""){
+  		  						alert("您还没有选择位置!");
+  		  						return false;
+  		  					}
+  		  					$("input[name='count']").each(function(){
+  		  						if($(this).val()>0){
+  		  							isEmpty = 0;
+  		  							
+  		  							return false;
+  		  						}
+  		  					});
+  		  					if(isEmpty==0)
+  		  						$("div#createOrder").modal("show");
+  		  					else
+  		  						alert("您未选择商品!");
+							$("div#showPrice tbody").empty();
+  		  	  				var val = $(".count").parent('div').parent('div').parent('div').children("input[name='productid']");//.val();
+  		  	  				var trs="";
+  		  	  				var index=0;
+  		  	  				var totalPrice=0;
+  		  	  				//清空数组
+  		  	  				orderdetails.splice(0,orderdetails.length);
+  		  					
+  		  	  				for(var i = 0;i<val.length;i++){
+  		  						for(var key in  val[i]){
+ 		  							if(key=='value'){
+//  		  								console.log(val[i][key]);
+ 		  								var count = $(val[i]).nextAll("div div").find("input[name='count']").val();
+ 		  								if(count>0){
+ 		  									var productId = val[i][key];
+ 		  									var name = $(val[i]).nextAll("div div").find("span.name").text();
+ 	 		  								var price = $(val[i]).nextAll("div div").find("span.price").text();
+ 	 		  								totalPrice = totalPrice+parseInt(parseInt(price)*parseInt(count));
+ 		  									index = index+1;
+ 		  									trs += "<tr><td>"+index+"</td><td>"+name+"</td><td>"+price+"</td><td>"+count+"</td></tr>";
+ 		  									//console.log(val[i][key]+":"+count+":"+price);
+ 		  									var order_detail= new  Order_detail(parseInt(productId),parseInt(count));
+ 		  									orderdetails.push(order_detail);
+ 		  								}
+ 		  									
+ 		  							}
+ 		  							
+  		  					}
+  		  					}
+  		  	  			trs +="<tr><td>总价：</td><td></td><td></td><td>"+totalPrice+"元</td></tr>"
+  		  	  			$("div#showPrice tbody").append(trs);
+//   		  	  			$("div#submitOrder th#finalPrice").empty();
+//   		  	  			$("div#submitOrder th#finalPrice").append(totalPrice+"元");
+  		  				});
+  					}
+  				});
+  				//计算价格
+  				$("button#addOrder").click(function(){
+  					var tableId = $("select#tableSelect").val();
+  					var remark = $("textarea[name='remark']").val();
+  					if(tableId==""){
+  						alert("请您选择位置再进行付款");
+  						return false;
+  					}
+  					if(orderdetails.length==0){
+  						alert("您没有选择商品,请返回首页");
+	  					return false;
+  					}
+  					var order = new Order(tableId,remark,orderdetails);
+  					var order_json = JSON.stringify(order);
+  					$.post("order/calculate",{order:order_json},function(data){
+  						if(data.result=="success"){
+  							$("div#submitOrder th#finalPrice").empty();
+  	  		  	  			$("div#submitOrder th#finalPrice").append("总价格:"+data.total+"元");
+  						}
+  							
+  					});
+  					console.log(JSON.stringify(order));
+  					
+  					
+  				});
+  				//提交订单
+  				$("button#submitOrderSuccess").click(function(){
+  					var tableId = $("select#tableSelect").val();
+  					var remark = $("textarea[name='remark']").val();
+  					if(tableId==""){
+  						alert("请您选择位置再进行付款")
+  						return false;
+  					}
+  					if(orderdetails.length==0){
+  						alert("您没有选择商品,请返回首页");
+	  					return false;
+  					}
+  					var order = new Order(tableId,remark,orderdetails);
+  					var order_json = JSON.stringify(order);
+  					$.post("order/save",{order:order_json},function(data){
+  						if(data.result=="success"){
+  							doSend(data.orderId);//--3hhws
+//   							confirm('您的订单已经提交成功;\n订单编号:'+data.orderId+';\n店员稍后会与您确认收费信息');
+  							if(confirm('您的订单已经提交成功;\n订单编号:'+data.orderId+';\n您可以截图保存该订单编号;\n店员稍后会与您确认收费信息')){
+  								$('#createOrder').modal('hide');
+  	  		  					$('#submitOrder').modal('hide');
+  							}else{
+  								confirm('您的订单已经提交成功;\n订单编号:'+data.orderId+';\n您可以截图保存该订单编号;\n店员稍后会与您确认收费信息');
+  								$('#createOrder').modal('hide');
+  	  		  					$('#submitOrder').modal('hide');
+  							}
+  							$(".count").val(0);
+  						}else{
+  							alert("订单提交失败，请重新提交");
+  						}
+  					
+  					});
+  					
+  				});
+  				
+  				
+  			});
+</script>
+<script type="text/javascript">
+
+		var orderdetails =new Array();//存放已购商品
+		//订单详情类
+		function Order_detail(productId,count){
+			this.productId = productId;
+			this.count = count;
+		}
+		//订单类
+		function Order(tableId,remark,orderdetails){
+			this.tableId = tableId;
+			this.remark = remark;
+			this.orderdetails = orderdetails;
+		}
+</script>
+
+</body>
+</html>

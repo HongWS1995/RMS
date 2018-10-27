@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="css/easyui.css">
+<link rel="stylesheet" type="text/css" href="css/icon.css">
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<style type="text/css">
+.panel-body {
+	border: 0px;
+	background-color: inherit;
+}
+</style>
+<title>餐桌管理</title>
+</head>
+<body>
+	<div class="row" style="background-color: lightyellow">
+		<div class="col-md-4">
+			<h4>
+				<strong>餐桌管理</strong>
+			</h4>
+		</div>
+		<div class="col-md-8 text-right">
+			<a href="#" id="tablerAddLink" class="btn btn-default" data-toggle="modal" data-target="#addTableR">增加餐桌</a> 
+			<a href="#" id="tablerModifyLink" class="btn btn-default" data-toggle="modal" data-target="#updateTableR">修改餐桌</a> 
+			<a href="#" id="tablerDeleteLink" class="btn btn-default" data-toggle="modal" data-target="#deleteTableR">删除餐桌</a>
+		</div>
+	</div>
+	<div class="panel-body">
+		<form class="form-inline" role="form" id="queryForm">
+			<div class="form-group">
+				<label for="status">餐桌状态：</label>
+				<select class="form-control" name="status" required="required">
+					<option value="">请选择</option>
+					<option value="空闲">空闲</option>
+					<option value="已预定">已预定</option>
+					<option value="用餐中">用餐中</option>
+				</select>
+				<label for="tableName">餐桌名：</label> 
+				<input type="text" class="form-control" name="tableName" />
+				
+			</div>
+			<a href="#" id="tablerViewLink" class="btn btn-default">查找</a>
+
+		</form>
+	</div>
+	<br>
+	<br>
+	<input type="hidden" id="currentPage" value="1" />
+	<input type="hidden" id="totalRecord" />
+	<input type="hidden" id="totalPage" value="0" />
+	<input type="hidden" id="isBindLink" value="0" />
+	<input type="hidden" id="QueryForm" value="0" />
+	<input type="hidden" id="currentClickRowId" value="">
+	<div class="table-responsive" style="background-color: white">
+		<table class="table table-bordered table-hover table-striped">
+			<thead>
+				<tr>
+					<th>序号</th>
+					<th>餐桌id</th>
+					<th>餐桌名</th>
+					<th>餐桌容量</th>
+					<th>餐桌状态</th>
+				</tr>
+			</thead>
+			<tbody id="tablerTable">
+
+			</tbody>
+
+		</table>
+	</div>
+	<span class="btn_span text-left" id="currentPage">当前页：</span>
+	 <span class="btn_span text-right" id="totalPage">总页数：</span>
+	<span class="btn_span text-right" id="totalRecord">总记录数：</span>
+	<div class="btn-toolbar" role="toolbar">
+
+		<div class="btn-group" style="margin-left: 30%" id="pageButton">
+
+			<a href="#" class="btn btn-default" id="firstPage">首页</a> <a href="#"
+				class="btn btn-default" id="prevPage">&lt;&lt;&nbsp;上一页</a> <a
+				href="#" class="btn btn-default" id="nextPage">下一页&nbsp;&gt;&gt;</a>
+			<a href="#" class="btn btn-default" id="lastPage">末页</a>
+
+		</div>
+
+	</div>
+
+	<div class="modal fade" id="addTableR" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">增加餐桌</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<label for="name">餐桌名</label>
+							 <input type="text"class="form-control" id="name"  name="tableName" placeholder="请输入名称" required="required">
+							<label for="tableCapacity">餐桌容量(座位)</label>
+							<input type="text"class="form-control" id="tableCapacity" name="tableCapacity">
+						
+							<label for="status">餐桌状态：</label>
+							<select class="form-control statusSelect" name="status" required="required">
+								<option value="空闲">空闲</option>
+								<option value="已预定">已预定</option>
+								<option value="用餐中">用餐中</option>
+							</select>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="addTableRBtn">增加</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	
+	<div class="modal fade" id="updateTableR" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">修改餐桌</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<input type="hidden" name="id"/>
+							<label for="name">餐桌名</label>
+							<input type="text"class="form-control" id="name" name="tableName" placeholder="请输入名称" required="required">
+							<label for="tableCapacity">餐桌容量(座位)</label>
+							<input type="text"class="form-control" id="tableCapacity" name="tableCapacity">
+						
+							<label for="status">餐桌状态：</label>
+							<select class="form-control statusSelect" name="status" required="required">
+								<option value="空闲">空闲</option>
+								<option value="已预定">已预定</option>
+								<option value="用餐中">用餐中</option>
+							</select>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="updateTableRBtn">修改</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+
+
+<div class="modal fade" id="deleteTableR" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="myModalLabel">删除餐桌</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form">
+						<div class="form-group">
+							<input type="hidden" name="id"/>
+							<label for="tableName">餐桌名</label>
+							<input type="text"class="form-control" id="tableName" name="tableName" readonly="readonly">
+							<label for="tableCapacity">餐桌容量(座位)</label>
+							<input type="text"class="form-control" id="tableCapacity" name="tableCapacity" readonly="readonly">
+							<label for="status">餐桌状态：</label>
+							<select class="form-control statusSelect" name="status" >
+								<option value="">请选择</option>
+								<option value="空闲">空闲</option>
+								<option value="已预定">已预定</option>
+								<option value="用餐中">用餐中</option>
+							</select>
+							</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					<button type="button" class="btn btn-primary" id="deleteTableRBtn">删除</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal -->
+	</div>
+	<script type="text/javascript" src="tabler/main.js"></script>
+</body>
+</html>

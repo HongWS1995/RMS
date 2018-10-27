@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hong.dao.ProductMapper">
+  <resultMap id="BaseResultMap" type="com.hong.bean.Product">
+    
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="cid" jdbcType="INTEGER" property="cid" />
+    <result column="price" jdbcType="REAL" property="price" />
+    <result column="imagePath" jdbcType="VARCHAR" property="imagepath" />
+  </resultMap>
+  <resultMap id="categoryMap" type="com.hong.bean.Category">
+    <id column="c_id" jdbcType="INTEGER" property="id" />
+    <result column="c_name" jdbcType="VARCHAR" property="name" />
+  </resultMap>
+  <resultMap id="ProductCategoryResultMap" type="com.hong.bean.Product">
+    <id column="p_id" jdbcType="INTEGER" property="id" />
+    <result column="p_name" jdbcType="VARCHAR" property="name" />
+    <result column="P_cid" jdbcType="INTEGER" property="cid" />
+    <result column="p_price" jdbcType="REAL" property="price" />
+    <result column="p_imagePath" jdbcType="VARCHAR" property="imagepath" />
+    <association property="category" column="p_cid" resultMap="categoryMap"></association>
+  </resultMap>
+  <sql id="Base_Column_List">
+    
+    id, name, cid, price, imagePath
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    
+    select 
+    <include refid="Base_Column_List" />
+    from product
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="getProductList" resultMap="ProductCategoryResultMap">
+	select  
+	p.id as p_id,
+	p.name as p_name,
+	p.cid as p_cid,
+	p.price as p_price,
+	p.imagePath  as p_imagePath,
+	c.id as c_id,
+	c.name as c_name
+	from  Product p ,Category c
+	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			p.cid = c.id and p.isRemove='N' 
+			<if test="product.name!=null">AND p.name like "%"#{product.name}"%"</if>
+			<if test="product.cid!=null">AND p.cid=#{product.cid}</if>
+	</trim>
+	order by p.id
+	limit #{currentPage},#{pageSize}
+	
+</select>
+<select id="selectCount" resultType="Integer">
+		select count(*) from  Product 
+	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			isRemove='N'
+			<if test="product.name!=null">AND name like "%"#{product.name}"%"</if>
+			<if test="product.cid!=null">AND cid=#{product.cid}</if>
+	</trim>
+</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    update product set isRemove='Y'
+<!--     delete from product -->
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hong.bean.Product" useGeneratedKeys="true" keyProperty="id">
+    
+    insert into product (id, name, cid, 
+      price, imagePath)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{cid,jdbcType=INTEGER}, 
+      #{price,jdbcType=REAL}, #{imagepath,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hong.bean.Product" useGeneratedKeys="true" keyProperty="id">
+    
+    insert into product
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="cid != null">
+        cid,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+      <if test="imagepath != null">
+        imagePath,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="cid != null">
+        #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=REAL},
+      </if>
+      <if test="imagepath != null">
+        #{imagepath,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hong.bean.Product">
+    
+    update product
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="cid != null">
+        cid = #{cid,jdbcType=INTEGER},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=REAL},
+      </if>
+      <if test="imagepath != null">
+        imagePath = #{imagepath,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hong.bean.Product">
+    
+    update product
+    set name = #{name,jdbcType=VARCHAR},
+      cid = #{cid,jdbcType=INTEGER},
+      price = #{price,jdbcType=REAL},
+      imagePath = #{imagepath,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

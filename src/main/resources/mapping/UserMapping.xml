@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hong.mapper.UserMapper" >
+	<resultMap type="user" id="UserMap">
+		<id column="id" property="id"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="isLogin" property="isLogin"/>
+		<result column="login_times" property="login_times"/>
+		<result column="lastest_login_time" property="lastest_login_time"/>
+		<result column="isStaff" property="isStaff"/> 
+		<result column="Ptype_id" property="Ptype_id"/>
+		<result column="canLogin" property="canLogin"/>
+	</resultMap>
+	<select id="getUserById" parameterType="int" resultMap="UserMap">
+		select * from User where id = #{id}
+	</select>
+	<select id="getUserByName" parameterType="String" resultMap="UserMap">
+		select * from User where username like #{username}
+	</select>
+	<select id="getUserByNamePassword" parameterType="String" resultMap="UserMap">
+		select * from User where username = #{username} and password = #{password} 
+	</select>
+	<select id="getUserList" resultMap="UserMap">
+		select * from  User limit #{currentPage},#{pageSize}
+	</select>
+	<select id="getUsers" parameterType="Integer" resultMap="UserMap">
+		select * from User where Ptype_id=#{Ptype_id}
+	</select>
+	<update id="updateUser" parameterType="user">
+		update User set id = #{id},username = #{username},password=#{password},isLogin=#{isLogin}
+ 		,login_times = #{login_times},lastest_login_time=#{lastest_login_time},isStaff=#{isStaff},Ptype_id=#{Ptype_id},canLogin=#{canLogin}
+		where id = #{id}
+	</update>
+	<!-- 插入的时候，占位符的位置不能错了，否则类型对不上(PrepareStatement(?,?,?,?,?)) -->
+ 	<insert id="insertUser" parameterType="user">
+ 		insert into user values(#{id},#{username},#{password},#{isLogin}
+ 		,#{login_times},#{lastest_login_time},#{isStaff},#{Ptype_id},#{canLogin})
+ 	</insert> 
+ 	<delete id="deleteUser" parameterType="user"> 
+ 		delete from user where id = #{id}
+ 	</delete>
+</mapper>

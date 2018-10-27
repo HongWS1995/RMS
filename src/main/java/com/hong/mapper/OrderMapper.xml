@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hong.dao.OrderMapper">
+  <resultMap id="BaseResultMap" type="com.hong.bean.Order">
+    
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="table_id" jdbcType="INTEGER" property="tableId" />
+    <result column="total" jdbcType="INTEGER" property="total" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="createTime" jdbcType="VARCHAR" property="createtime" />
+  </resultMap>
+  	<resultMap id="TableRResultMap" type="com.hong.bean.TableR">
+	    <result column="t_name" jdbcType="VARCHAR" property="tableName" />
+  	</resultMap>
+  	<resultMap id="ProductResultMap" type="com.hong.bean.Product">
+    
+	    <id column="od_product_id" jdbcType="INTEGER" property="id" />
+	    <result column="p_name" jdbcType="VARCHAR" property="name" />
+	    <result column="p_price" jdbcType="REAL" property="price" />
+  	</resultMap>
+  	<resultMap id="DetailsResultMap" type="com.hong.bean.Orderdetail">
+	    <id column="od_id" jdbcType="INTEGER" property="id" />
+	    <result column="od_order_id" jdbcType="INTEGER" property="orderId" />
+	    <result column="od_product_id" jdbcType="INTEGER" property="productId" />
+	    <result column="od_count" jdbcType="INTEGER" property="count" />
+	    <result column="od_flag" jdbcType="VARCHAR" property="flag" />
+	    <association property="product" column="od_product_id" resultMap="ProductResultMap"/>
+  </resultMap>
+	<resultMap type="com.hong.bean.Order" id="OrderTableMap">
+		<id column="o_id" jdbcType="INTEGER" property="id" />
+		<result column="o_total" jdbcType="INTEGER" property="total" />
+   	 	<result column="o_status" jdbcType="VARCHAR" property="status" />
+   		<result column="o_remark" jdbcType="VARCHAR" property="remark" />
+    	<result column="o_createTime" jdbcType="VARCHAR" property="createtime" />
+		<association property="tableR" column="o_tableId" resultMap="TableRResultMap"/>
+	</resultMap>
+	
+	<resultMap type="com.hong.bean.Order" id="OrderDetailMap">
+		<id column="o_id" jdbcType="INTEGER" property="id" />
+		<result column="o_total" jdbcType="INTEGER" property="total" />
+   	 	<result column="o_status" jdbcType="VARCHAR" property="status" />
+   		<result column="o_remark" jdbcType="VARCHAR" property="remark" />
+    	<result column="o_createTime" jdbcType="VARCHAR" property="createtime" />
+		<association property="tableR" column="o_tableId" resultMap="TableRResultMap"/>
+		<collection property="orderdetails" column="o_id" ofType="com.hong.bean.Orderdetail" resultMap="DetailsResultMap"/>
+	</resultMap>
+  <sql id="Base_Column_List">
+    
+    id, table_id, total, status, remark, createTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    
+    select 
+    <include refid="Base_Column_List" />
+    from `order`
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <select id="getOrderList" resultMap="OrderTableMap">
+		select 	o.id as o_id,
+				o.table_id as o_tableId,
+				t.id as t_id,
+				t.table_name as t_name,	
+				o.total as o_total,
+				o.status as o_status,
+				o.createtime as o_createtime,
+				o.remark as o_remark			
+		from `order` o left outer join table_r t
+		on o.table_id = t.id
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="order.id!=null">o.id=#{order.id}</if>
+			<if test="order.tableId!=null">AND o.table_id=#{order.tableId}</if>
+			<if test="order.status!=null">AND o.status=#{order.status}</if>
+		</trim>
+		limit #{currentPage},#{pageSize}
+	</select>
+	<select id="getAllOrderDetail" resultMap="OrderTableMap">
+		select 	o.id as o_id,
+				o.table_id as o_tableId,
+				t.id as t_id,
+				t.table_name as t_name,	
+				o.total as o_total,
+				o.status as o_status,
+				o.createtime as o_createtime,
+				o.remark as o_remark			
+		from `order` o left outer join table_r t
+		on o.table_id = t.id
+	</select>
+	<select id="getOrderCount" resultType="Integer">
+		select count(1) from `order`
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="order.id!=null">id=#{order.id}</if>
+			<if test="order.tableId!=null">AND table_id=#{order.tableId}</if>
+			<if test="order.status!=null">AND status=#{order.status}</if>
+		</trim>
+	</select>
+  	<select id="getOrderDetailById" resultMap="OrderDetailMap" parameterType="java.lang.Integer" >
+		select 	o.id as o_id,
+				o.table_id as o_tableId,
+				t.id as t_id,
+				t.table_name as t_name,	
+				o.total as o_total,
+				o.status as o_status,
+				o.createtime as o_createtime,
+				o.remark as o_remark,
+				od.id as od_id,
+				od.product_id as od_product_id,
+				od.count as od_count,
+				od.flag as od_flag,
+				p.name as p_name,
+				p.price as p_price			
+		from `order` o left outer join table_r t
+		on o.table_id = t.id left outer join orderdetail od on o.id = od.order_id
+		left outer join product p on od.product_id = p.id
+		where o.id = #{id,jdbcType=INTEGER}
+	</select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    
+    delete from `order`
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hong.bean.Order" useGeneratedKeys="true" keyProperty="id">
+    
+    insert into `order` (id, table_id, total, 
+      status, remark, createTime
+      )
+    values (#{id,jdbcType=INTEGER}, #{tableId,jdbcType=INTEGER}, #{total,jdbcType=INTEGER}, 
+      #{status,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createtime,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hong.bean.Order" useGeneratedKeys="true" keyProperty="id">
+    
+    insert into `order`
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="tableId != null">
+        table_id,
+      </if>
+      <if test="total != null">
+        total,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="createtime != null">
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tableId != null">
+        #{tableId,jdbcType=INTEGER},
+      </if>
+      <if test="total != null">
+        #{total,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null">
+        #{createtime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hong.bean.Order">
+    
+    update `order`
+    <set>
+      <if test="tableId != null">
+        table_id = #{tableId,jdbcType=INTEGER},
+      </if>
+      <if test="total != null">
+        total = #{total,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null">
+        createTime = #{createtime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hong.bean.Order">
+    
+    update `order`
+    set table_id = #{tableId,jdbcType=INTEGER},
+      total = #{total,jdbcType=INTEGER},
+      status = #{status,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      createTime = #{createtime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="getOrderStatistic" resultType="java.util.HashMap" parameterType="java.util.Map">
+  	<choose>
+  		<when test='period=="日"'>
+  			SELECT LEFT(createTime,10) AS period_1,COUNT(1) AS total,SUM(total) as amount FROM `order`
+  		</when>
+  		<otherwise>
+  			<choose>
+  				<when test='period=="月"'>
+  					SELECT LEFT(createTime,7) AS period_1,COUNT(1) AS total,SUM(total) as amount FROM `order`
+  				</when>
+  				<otherwise>
+  					SELECT LEFT(createTime,4) AS period_1,COUNT(1) AS total,SUM(total) as amount FROM `order`
+  				</otherwise>
+  			</choose>
+  		</otherwise>
+  	</choose>
+  	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+				createTime between #{startTime} and #{endTime}
+			</if>
+			<if test="status!=null and status!=''">and status=#{status}</if>
+	</trim>
+	GROUP BY period_1
+  </select>
+  
+  <select id="getOrderDetailStatistic" resultType="java.util.HashMap" parameterType="java.util.Map">
+  	select p.name as p_name,sum(od.count) as p_count
+  	from `order` o left outer join orderdetail od on o.id = od.order_id 
+  	left outer join product p on od.product_id =p.id    
+  	<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+				createTime between #{startTime} and #{endTime}
+			</if>
+			<if test="status!=null and status!=''">and status=#{status}</if>
+			<if test="status!=null and status!='' and status=='已提交'">and od.flag='0'</if>
+	</trim>
+	GROUP BY p_name order by p_count asc
+  </select>
+</mapper>
